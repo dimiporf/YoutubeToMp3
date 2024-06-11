@@ -177,7 +177,7 @@ namespace YoutubeToMp3.Controllers
         private async Task ConvertToMp3Async(string inputFile, string outputFile)
         {
             // Path to the ffmpeg executable
-            var ffmpegPath = @"C:\Users\dimip\Downloads\ffmpeg-2024-06-09-git-94f2274a8b-essentials_build\ffmpeg-2024-06-09-git-94f2274a8b-essentials_build\bin\ffmpeg.exe";
+            var ffmpegPath = _configuration["Paths:FfmpegPath"];
             var startInfo = new ProcessStartInfo
             {
                 FileName = ffmpegPath,
