@@ -1,0 +1,59 @@
+﻿@model YoutubeToMp3.Models.VideoModel
+
+@{
+    ViewBag.Title = "Video Downloader and Converter";
+}
+
+<h2>Video Downloader and Converter</h2>
+
+<form asp-controller="Video" asp-action="Download" method="post" onsubmit="showLoadingMessage()">
+    <div class="form-group">
+        <label for="YouTubeUrl">YouTube URL:</label>
+        <input type="text" class="form-control" id="YouTubeUrl" name="YouTubeUrl" />
+    </div>
+    <button type="submit" class="btn btn-primary">Download Video</button>
+</form>
+
+<form asp-controller="Video" asp-action="Convert" method="post" onsubmit="showLoadingMessage()">
+    <input type="hidden" name="OutputPath" value="@ViewBag.OutputPath" />
+    <button type="submit" class="btn btn-secondary">Convert to MP3</button>
+</form>
+
+<div id="loadingMessage" style="display:none;">
+    <p>Loading, please wait...</p>
+</div>
+
+<div id="progressLog"></div>
+
+@if (!string.IsNullOrEmpty(ViewBag.Message))
+{
+    <div class="alert alert-info">@ViewBag.Message</div>
+}
+
+@if (!string.IsNullOrEmpty(ViewBag.Mp3Path))
+{
+    <div>
+        <a href="@Url.Content(ViewBag.Mp3Path)" class="btn btn-success">Download MP3</a>
+    </div>
+}
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/3.1.18/signalr.min.js"></script>
+    <script>
+        const connection = new signalR.HubConnectionBuilder().withUrl("/progressHub").build();
+
+        connection.on("ReceiveProgress", function (message) {
+            const progressLog = document.getElementById("progressLog");
+            progressLog.innerHTML += message + "<br />";
+        });
+
+        connection.start().catch(function (err) {
+            return console.error(err.toString());
+        });
+
+        function showLoadingMessage() {
+            document.getElementById("loadingMessage").style.display = "block";
+            document.getElementById("progressLog").innerHTML = "";
+        }
+    </script>
+}
