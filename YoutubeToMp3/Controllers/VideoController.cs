@@ -159,8 +159,11 @@ namespace YoutubeToMp3.Controllers
 
             using (var process = new Process { StartInfo = startInfo })
             {
-                process.OutputDataReceived += async (sender, args) => await progressHubContext.Clients.All.SendAsync("ReceiveProgress", args.Data);
-                process.ErrorDataReceived += async (sender, args) => await progressHubContext.Clients.All.SendAsync("ReceiveProgress", args.Data);
+                if (progressHubContext != null)
+                {
+                    process.OutputDataReceived += async (sender, args) => await progressHubContext.Clients.All.SendAsync("ReceiveProgress", args.Data);
+                    process.ErrorDataReceived += async (sender, args) => await progressHubContext.Clients.All.SendAsync("ReceiveProgress", args.Data);
+                }
 
                 process.Start();
                 process.BeginOutputReadLine();
