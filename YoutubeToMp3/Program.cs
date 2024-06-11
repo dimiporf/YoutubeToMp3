@@ -6,9 +6,16 @@ using Microsoft.AspNetCore.Hosting;
 // Create a new web application using the provided arguments
 var builder = WebApplication.CreateBuilder(args);
 
+var configuration = new ConfigurationBuilder()
+    .AddJsonFile("appsettings.json")
+    .Build();
+
 // Add services to the container.
 builder.Services.AddControllersWithViews(); // Add MVC services to the container
 builder.Services.AddSignalR(); // Add SignalR services to the container
+
+// Add configuration to the DI container
+builder.Services.AddSingleton(configuration);
 
 var app = builder.Build(); // Build the web application
 

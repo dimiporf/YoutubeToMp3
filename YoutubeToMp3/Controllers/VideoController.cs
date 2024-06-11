@@ -12,10 +12,12 @@ namespace YoutubeToMp3.Controllers
         // Fields for SignalR communication and thread safety
         private IHubContext progressHubContext;
         private readonly object hubContextLock = new object();
+        private readonly IConfiguration _configuration;
 
         // Constructor for the VideoController class
-        public VideoController()
+        public VideoController(IConfiguration configuration)
         {
+            _configuration = configuration;
             // The progressHubContext field is not initialized here
         }
 
@@ -112,13 +114,13 @@ namespace YoutubeToMp3.Controllers
         {
             // Ensure the SignalR hub context is initialized
             var hubContext = ProgressHubContext;
+            var ytDlpPath = _configuration["Paths:YtDlpPath"];
 
             // Set the output directory and file name for the downloaded video
-            string outputDirectory = @"C:\Users\dimip\Desktop\TestFolder\";
+            string outputDirectory = _configuration["Paths:DownloadFolder"]; 
             string outputFile = Path.Combine(outputDirectory, $"downloaded_{DateTime.Now:yyyyMMddHHmmss}.mp4");
 
-            // Path to the yt-dlp executable
-            var ytDlpPath = @"C:\Users\dimip\Downloads\ffmpeg-2024-06-09-git-94f2274a8b-essentials_build\ffmpeg-2024-06-09-git-94f2274a8b-essentials_build\bin\yt-dlp.exe";
+            // Path to the yt-dlp executable            
             var startInfo = new ProcessStartInfo
             {
                 FileName = ytDlpPath,
