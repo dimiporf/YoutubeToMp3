@@ -268,6 +268,22 @@ namespace YoutubeToMp3.Controllers
         // Asynchronously convert a video to MP3 format
         private async Task ConvertToMp3Async(string inputFile, string outputFile)
         {
+            // Check if the output file already exists
+            if (System.IO.File.Exists(outputFile))
+            {
+                // If the file exists, generate a unique filename by appending a number to the filename
+                string directory = Path.GetDirectoryName(outputFile);
+                string filenameWithoutExtension = Path.GetFileNameWithoutExtension(outputFile);
+                string extension = Path.GetExtension(outputFile);
+                int counter = 1;
+
+                do
+                {
+                    outputFile = Path.Combine(directory, $"{filenameWithoutExtension}_{counter}{extension}");
+                    counter++;
+                } while (System.IO.File.Exists(outputFile));
+            }
+
             // Path to the ffmpeg executable
             var ffmpegPath = _configuration["Paths:FfmpegPath"];
             var startInfo = new ProcessStartInfo
@@ -309,5 +325,6 @@ namespace YoutubeToMp3.Controllers
                 System.IO.File.Delete(inputFile);
             }
         }
+
     }
 }

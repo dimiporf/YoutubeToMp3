@@ -4,7 +4,12 @@
     ViewBag.Title = "Video Downloader and Converter";
 }
 
-<h2>Video Downloader and Converter</h2>
+<!-- Include Font Awesome CSS -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+
+<h2><!-- Display the YouTube icon -->
+    <i class="fab fa-youtube"></i>
+    Video Downloader and Converter</h2>
 
 <form asp-controller="Video" asp-action="Download" method="post" onsubmit="showLoadingMessage()">
     <div class="form-group">
