@@ -2,7 +2,8 @@
 using Microsoft.AspNetCore.Mvc; // Importing MVC controller classes
 using System.Threading.Tasks; // Importing types for asynchronous programming
 using System.Diagnostics; // Importing classes for working with system processes
-using YoutubeToMp3.Models; // Importing custom models
+using YoutubeToMp3.Models;
+using System.Text.Json; // Importing custom models
 
 namespace YoutubeToMp3.Controllers
 {
@@ -116,9 +117,20 @@ namespace YoutubeToMp3.Controllers
             var hubContext = ProgressHubContext;
             var ytDlpPath = _configuration["Paths:YtDlpPath"];
 
-            // Set the output directory and file name for the downloaded video
-            string outputDirectory = _configuration["Paths:DownloadFolder"]; 
-            string outputFile = Path.Combine(outputDirectory, $"downloaded_{DateTime.Now:yyyyMMddHHmmss}.mp4");
+            // Set the output directory for the downloaded video
+            string outputDirectory = _configuration["Paths:DownloadFolder"];
+
+            // Get video metadata
+            var metadata = await GetVideoMetadataAsync(url);
+            var artist = metadata.RootElement.GetProperty("uploader").GetString() ?? "UnknownArtist";
+            var title = metadata.RootElement.GetProperty("title").GetString() ?? "UnknownTitle";
+
+            // Sanitize artist and title to ensure valid file names
+            string sanitizedArtist = string.Join("_", artist.Split(Path.GetInvalidFileNameChars()));
+            string sanitizedTitle = string.Join("_", title.Split(Path.GetInvalidFileNameChars()));
+
+            // Construct output file name using artist and title
+            string outputFile = Path.Combine(outputDirectory, $"{sanitizedArtist}-{sanitizedTitle}.mp4");
 
             // Path to the yt-dlp executable            
             var startInfo = new ProcessStartInfo
@@ -173,6 +185,38 @@ namespace YoutubeToMp3.Controllers
             return outputFile;
         }
 
+        private async Task<JsonDocument> GetVideoMetadataAsync(string url)
+        {
+            var ytDlpPath = _configuration["Paths:YtDlpPath"];
+            var startInfo = new ProcessStartInfo
+            {
+                FileName = ytDlpPath,
+                Arguments = $"--dump-json -- {url}",
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+
+            using (var process = new Process { StartInfo = startInfo })
+            {
+                process.Start();
+
+                string output = await process.StandardOutput.ReadToEndAsync();
+                string errorOutput = await process.StandardError.ReadToEndAsync();
+                await process.WaitForExitAsync();
+
+                if (process.ExitCode != 0)
+                {
+                    System.IO.File.WriteAllText("error_log.txt", errorOutput);
+                    throw new Exception($"yt-dlp failed to retrieve video metadata. Error: {errorOutput}");
+                }
+
+                return JsonDocument.Parse(output);
+            }
+        }
+
+
         // Asynchronously convert a video to MP3 format
         private async Task ConvertToMp3Async(string inputFile, string outputFile)
         {
@@ -211,6 +255,7 @@ namespace YoutubeToMp3.Controllers
                     throw new Exception("FFmpeg failed to convert the video to MP3.");
                 }
             }
+
         }
     }
 }
