@@ -7,9 +7,11 @@
 <!-- Include Font Awesome CSS -->
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
 
-<h2><!-- Display the YouTube icon -->
+<h2>
+    <!-- Display the YouTube icon -->
     <i class="fab fa-youtube"></i>
-    Video Downloader and Converter</h2>
+    Video Downloader and Converter
+</h2>
 
 <form asp-controller="Video" asp-action="Download" method="post" onsubmit="showLoadingMessage()">
     <div class="form-group">
@@ -38,7 +40,7 @@
 @if (!string.IsNullOrEmpty(ViewBag.Mp3Path))
 {
     <div>
-        <button id="downloadMp3Button" class="btn btn-success">Download MP3</button>
+        <a id="downloadMp3Button" class="btn btn-success" href="/Video/DownloadMp3?mp3FileName=@ViewBag.Mp3FileName">Download MP3</a>
     </div>
 }
 
@@ -63,7 +65,7 @@
 
         document.getElementById('downloadMp3Button').addEventListener('click', function () {
             var mp3FileName = '@ViewBag.Mp3FileName'; // Assuming you have set ViewBag.Mp3FileName in your controller action
-            window.location.href = '/Video/DownloadMp3?mp3FileName=' + mp3FileName;
+            window.location.href = '/Video/DownloadMp3?mp3FileName=' + encodeURIComponent(mp3FileName);
         });
     </script>
 }
