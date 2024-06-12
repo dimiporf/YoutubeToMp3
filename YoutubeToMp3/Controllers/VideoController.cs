@@ -130,7 +130,7 @@ namespace YoutubeToMp3.Controllers
             string sanitizedTitle = string.Join("_", title.Split(Path.GetInvalidFileNameChars()));
 
             // Construct output file name using artist and title
-            string outputFile = Path.Combine(outputDirectory, $"{sanitizedArtist}-{sanitizedTitle}.mp4");
+            string outputFile = Path.Combine(outputDirectory, $"{sanitizedArtist}-{sanitizedTitle}");
 
             // Path to the yt-dlp executable            
             var startInfo = new ProcessStartInfo
