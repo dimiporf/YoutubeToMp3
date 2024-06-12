@@ -122,12 +122,29 @@ namespace YoutubeToMp3.Controllers
 
             // Get video metadata
             var metadata = await GetVideoMetadataAsync(url);
-            var artist = metadata.RootElement.GetProperty("uploader").GetString() ?? "UnknownArtist";
             var title = metadata.RootElement.GetProperty("title").GetString() ?? "UnknownTitle";
+
+            string artist;
+            string videoTitle;
+
+            // Check if the title contains "-"
+            if (title.Contains("-"))
+            {
+                // Split the title by "-" character to separate artist and title
+                string[] titleParts = title.Split('-');
+                artist = titleParts.Length > 1 ? titleParts[0].Trim() : "UnknownArtist";
+                videoTitle = titleParts.Length > 1 ? titleParts[1].Trim() : title.Trim();
+            }
+            else
+            {
+                // If no "-", parse artist from other root element
+                artist = metadata.RootElement.GetProperty("uploader").GetString() ?? "UnknownArtist";
+                videoTitle = title;
+            }
 
             // Sanitize artist and title to ensure valid file names
             string sanitizedArtist = string.Join("_", artist.Split(Path.GetInvalidFileNameChars()));
-            string sanitizedTitle = string.Join("_", title.Split(Path.GetInvalidFileNameChars()));
+            string sanitizedTitle = string.Join("_", videoTitle.Split(Path.GetInvalidFileNameChars()));
 
             // Construct output file name using artist and title
             string outputFile = Path.Combine(outputDirectory, $"{sanitizedArtist}-{sanitizedTitle}");
