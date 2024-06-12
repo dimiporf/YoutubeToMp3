@@ -272,7 +272,11 @@ namespace YoutubeToMp3.Controllers
                     throw new Exception("FFmpeg failed to convert the video to MP3.");
                 }
             }
-
+            // Delete the input video file after conversion
+            if (System.IO.File.Exists(inputFile))
+            {
+                System.IO.File.Delete(inputFile);
+            }
         }
     }
 }
