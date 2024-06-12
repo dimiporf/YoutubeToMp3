@@ -99,6 +99,7 @@ namespace YoutubeToMp3.Controllers
                 await ConvertToMp3Async(model.OutputPath, mp3Path);
                 // Set success message and MP3 path
                 ViewBag.Message = "Video converted to MP3 successfully.";
+                ViewBag.Mp3FileName = Path.GetFileName(mp3Path); // Set the MP3 file name
                 ViewBag.Mp3Path = mp3Path;
             }
             catch (Exception ex)
@@ -232,6 +233,36 @@ namespace YoutubeToMp3.Controllers
                 return JsonDocument.Parse(output);
             }
         }
+
+        // Action method for handling MP3 download requests
+        [HttpGet]
+        [Route("Video/DownloadMp3")]
+        public IActionResult DownloadMp3(string mp3FileName)
+        {
+            // Ensure that the provided MP3 file name is not null or empty
+            if (string.IsNullOrEmpty(mp3FileName))
+            {
+                // Redirect to the Index action with an error message if the file name is invalid
+                ViewBag.Message = "Invalid MP3 file name.";
+                return RedirectToAction("Index");
+            }
+
+            // Get the path to the MP3 file in the download folder
+            string mp3FilePath = Path.Combine(_configuration["Paths:DownloadFolder"], mp3FileName);
+
+            // Check if the MP3 file exists
+            if (!System.IO.File.Exists(mp3FilePath))
+            {
+                // Redirect to the Index action with an error message if the file does not exist
+                ViewBag.Message = "MP3 file not found.";
+                return RedirectToAction("Index");
+            }
+
+            // Provide the MP3 file to the user for download
+            var fileStream = new FileStream(mp3FilePath, FileMode.Open);
+            return File(fileStream, "audio/mpeg", mp3FileName);
+        }
+
 
 
         // Asynchronously convert a video to MP3 format

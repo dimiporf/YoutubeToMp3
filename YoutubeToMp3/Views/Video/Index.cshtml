@@ -33,7 +33,7 @@
 @if (!string.IsNullOrEmpty(ViewBag.Mp3Path))
 {
     <div>
-        <a href="@Url.Content(ViewBag.Mp3Path)" class="btn btn-success">Download MP3</a>
+        <button id="downloadMp3Button" class="btn btn-success">Download MP3</button>
     </div>
 }
 
@@ -55,5 +55,10 @@
             document.getElementById("loadingMessage").style.display = "block";
             document.getElementById("progressLog").innerHTML = "";
         }
+
+        document.getElementById('downloadMp3Button').addEventListener('click', function () {
+            var mp3FileName = '@ViewBag.Mp3FileName'; // Assuming you have set ViewBag.Mp3FileName in your controller action
+            window.location.href = '/Video/DownloadMp3?mp3FileName=' + mp3FileName;
+        });
     </script>
 }
